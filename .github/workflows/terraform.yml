@@ -1,4 +1,4 @@
-name: AWS OIDC Test
+name: Terraform Plan
 
 on:
   workflow_dispatch:
@@ -8,18 +8,36 @@ permissions:
   contents: read
 
 jobs:
-  aws-auth-test:
+  terraform-plan:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
           role-to-assume: arn:aws:iam::760396521684:role/terraform-github-actions
           aws-region: us-east-1
 
-      - name: Verify AWS identity
-        run: aws sts get-caller-identity
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Terraform Init
+        working-directory: envs/dev
+        run: terraform init -input=false
+
+      - name: Terraform Format Check
+        working-directory: envs/dev
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        working-directory: envs/dev
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: envs/dev
+        run: terraform plan -input=false -no-color
+        env:
+          TF_VAR_db_password: ${{ secrets.TF_VAR_db_password }}
