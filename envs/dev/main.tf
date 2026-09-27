@@ -53,8 +53,8 @@ module "rds" {
   project = local.project
   env     = local.env
 
-  username = "pharmaadmin"
-  password = var.db_password
+  username         = "pharmaadmin"
+  password         = var.db_password
   password_version = 2
 
   vpc_id                     = module.vpc.vpc_id
