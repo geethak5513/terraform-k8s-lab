@@ -55,6 +55,7 @@ module "rds" {
 
   username = "pharmaadmin"
   password = var.db_password
+  password_version = 2
 
   vpc_id                     = module.vpc.vpc_id
   db_subnet_group_name       = module.vpc.database_subnet_group_name
