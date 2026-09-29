@@ -1,3 +1,14 @@
+# EBS CSI Driver managed add-on
+resource "aws_eks_addon" "ebs_csi" {
+  cluster_name             = module.eks.cluster_name
+  addon_name               = "aws-ebs-csi-driver"
+  service_account_role_arn = module.iam.ebs_csi_role_arn
+
+  tags = {
+    Env     = local.env
+    Project = local.project
+  }
+}
 locals {
   project = "pharma"
   env     = "dev"
