@@ -60,6 +60,46 @@ resource "aws_iam_role_policy_attachment" "eso_secrets_attachment" {
   policy_arn = aws_iam_policy.eso_secrets_policy.arn
 }
 
+data "aws_iam_policy_document" "ebs_csi_assume_role" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    principals {
+      type        = "Federated"
+      identifiers = [var.oidc_provider_arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(var.oidc_provider_url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(var.oidc_provider_url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ebs_csi_role" {
+  name               = "${var.project}-${var.env}-ebs-csi-role"
+  assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume_role.json
+
+  tags = {
+    Name    = "${var.project}-${var.env}-ebs-csi-role"
+    Env     = var.env
+    Project = var.project
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi_policy_attachment" {
+  role       = aws_iam_role.ebs_csi_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEBSCSIDriverPolicyV2"
+}
+
 # ─── ArgoCD IRSA Role ──────────────────────────────────────────────────────
 
 data "aws_iam_policy_document" "argocd_assume_role" {
