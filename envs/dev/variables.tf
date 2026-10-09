@@ -13,13 +13,13 @@ variable "db_password" {
 variable "github_org" {
   description = "GitHub username or organization"
   type        = string
-  default     = "DPP-2026"
+  default     = "geethak5513"
 }
 
 variable "github_org_id" {
   description = "Numeric GitHub org/owner ID"
   type        = string
-  default     = "YOUR_ORG_ID"
+  default     = "41056499"
 }
 
 variable "github_repo_ids" {
